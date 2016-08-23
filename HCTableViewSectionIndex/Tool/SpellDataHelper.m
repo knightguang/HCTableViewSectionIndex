@@ -12,26 +12,29 @@
 
 + (NSMutableArray *)getSortListByDataSource:(NSMutableArray *)array
 {
-    NSMutableArray *ans = [[NSMutableArray alloc] init];
+    NSMutableArray *resultArray = [[NSMutableArray alloc] init];
     
+    // 1.对传入的数组排序
     NSArray *serializeArray = [(NSArray *)array sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
         
-        //排序
+        // 取出数组中的两个元素进行比较并排序
         int i;
         NSString *strA = ((YourModel *)obj1).pinyin;
         NSString *strB = ((YourModel *)obj2).pinyin;
         
+        // 判断 两个 string 首字母的大小，并将其排序，首字母相同会判断第二个字母，类推
         for (i = 0; i < strA.length && i < strB.length; i ++) {
             char a = [strA characterAtIndex:i];
             char b = [strB characterAtIndex:i];
             if (a > b) {
-                return (NSComparisonResult)NSOrderedDescending;//上升
+                return (NSComparisonResult)NSOrderedDescending;// 降序 @[b, a];
             }
             else if (a < b) {
-                return (NSComparisonResult)NSOrderedAscending;//下降
+                return (NSComparisonResult)NSOrderedAscending;// 升序 @[a, b];
             }
         }
         
+        // 前面所有相同字母都一样，长的排后面
         if (strA.length > strB.length) {
             return (NSComparisonResult)NSOrderedDescending;
         }else if (strA.length < strB.length){
@@ -41,34 +44,45 @@
         }
     }];
     
+    // 判断数字等 非字母 的 首字符
     char lastC = '1';
     NSMutableArray *data;
-    NSMutableArray *oth = [[NSMutableArray alloc] init];
+    NSMutableArray *otherData = [[NSMutableArray alloc] init];
+    
+    // 遍历排序好的数组，对相同首字母的model封装到一个dataArray里面
     for (YourModel *model in serializeArray) {
+        
         char c = [model.pinyin characterAtIndex:0];
+        
+        // 判断字符c是否为英文字母
         if (!isalpha(c)) {
-            [oth addObject:model];
+            [otherData addObject:model];
         }
+        // 如果当前model的首字母与之前的model的不一致，重新赋值char c，并存储当前model
         else if (c != lastC){
             lastC = c;
             if (data && data.count > 0) {
-                [ans addObject:data];
+                [resultArray addObject:data];
             }
             
             data = [[NSMutableArray alloc] init];
             [data addObject:model];
         }
+        // 如果当前model的首字母与之前的model的一致，直接添加model
         else {
             [data addObject:model];
         }
     }
+    
     if (data && data.count > 0) {
-        [ans addObject:data];
+        [resultArray addObject:data];
     }
-    if (oth.count > 0) {
-        [ans addObject:oth];
+    
+    if (otherData.count > 0) {
+        [resultArray addObject:otherData];
     }
-    return ans;
+    
+    return resultArray;
 }
 
 + (NSMutableArray *)getDataSourceSectionBy:(NSMutableArray *)array
@@ -78,12 +92,13 @@
     // 🔍
     [section addObject:UITableViewIndexSearch];
     
-    // 根据json格式 相应变换解析形式
+    // 解析传入的array，该array被上一个方法封装了，结构是：array 套 array
     for (NSArray *item in array) {
         
+        // 取得array的首元素：model
         YourModel *model = [item objectAtIndex:0];
         
-        // 拿到每一个model的首字母
+        // 拿到model的首字母
         char c = [model.pinyin characterAtIndex:0];
         
         // 判断字符c是否为英文字母
