@@ -8,6 +8,12 @@
     2、对dataSource进行排序
     3、点击侧边栏，跳转对应section
     
+<br/>具体使用：
+<br/>1.添加JSONModel第三方库
+<br/>2.添加Tool中的文件
+<br/>3.根据实际需求，建立model.h文件，并声明pinyin属性
+<br/>`@property (nonatomic,strong) NSString<Ignore>* pinyin;`
+
 <br/>效果图如下：
 <br/>
 ![](https://github.com/knightguang/HCTableViewSectionIndex/blob/master/HCTableViewSectionIndex/1.png)
